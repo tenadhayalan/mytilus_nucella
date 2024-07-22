@@ -1,113 +1,113 @@
-﻿snail_ID,snail_colors,blotted_wet_weight_g,shell_length_mm,shell_width_mm,tank,pH,temp
-1,dark green,1.6355,21.46,15.82,,,
-2,dark green-light green,0.9822,19.1,13.63,,,
-3,dark green-light green-dark green,0.5565,14.77,11.69,,,
-4,dark green-light green-pink,0.8315,16.62,12.13,,,
-5,dark green-light green-red,0.9675,18.26,12.59,,,
-6,dark green-pink,0.6258,15.46,11.45,,,
-7,dark green-pink-dark green,0.6714,16.63,12.45,,,
-8,dark green-pink-light green,0.8306,17.54,13.38,,,
-9,dark green-pink-red,0.6976,15.88,12.13,,,
-10,dark green-red,0.6737,17.04,12.68,,,
-11,dark green-red-dark green,0.9899,18.37,13.88,,,
-12,dark green-red-light green,0.6003,14.91,11.77,,,
-13,dark green-red-pink,1.1052,18.53,13.97,,,
-14,light green,0.9787,19.41,13.45,,,
-15,light green-dark green,1.2744,20.82,13.38,,,
-16,light green-dark green-light green,0.7244,15.65,12.51,,,
-17,light green-dark green-pink,0.6872,16.22,11.9,,,
-18,light green-dark green-red,1.0754,18.68,13.88,,,
-19,light green-pink,0.5933,15.62,11.54,,,
-20,light green-pink-dark green,0.9165,17.83,13.97,,,
-21,light green-pink-light green,0.7553,17.12,12.83,,,
-22,light green-pink-red,0.6852,16.05,11.97,,,
-23,light green-red,0.8177,16.63,13.12,,,
-24,light green-red-dark green,0.8915,16.78,13.63,,,
-25,light green-red-light green,0.7719,16.94,12.78,,,
-26,light green-red-pink,0.5699,15.46,11.36,,,
-27,pink,0.8567,18.03,13.33,,,
-28,pink-dark green,0.6306,15.71,11.36,,,
-29,pink-dark green-light green,0.6444,16.19,12.09,,,
-30,pink-dark green-light green-pink,1.1327,19.39,14,,,
-31,pink-dark green-light green-red,0.5559,14.7,11.56,,,
-32,pink-dark green-pink,0.5875,15.47,12.08,,,
-33,pink-dark green-pink-dark green,0.5527,14.38,11.71,,,
-34,pink-dark green-pink-light green,0.9021,17.74,12.58,,,
-35,pink-dark green-pink-red,0.9115,18.21,13.31,,,
-36,pink-dark green-red,0.7496,16.42,12.57,,,
-37,pink-dark green-red-dark green,0.9211,18.55,13.18,,,
-38,pink-dark green-red-light green,1.1451,18.97,14.76,,,
-39,pink-dark green-red-pink,0.7745,17.54,13.43,,,
-40,pink-light green,0.66,16.41,12.35,,,
-41,pink-light green-dark green,0.4901,15.14,11.5,,,
-42,pink-light green-dark green-light green,0.7325,16.18,12.74,,,
-43,pink-light green-dark green-pink,0.5794,15.25,11.89,,,
-44,pink-light green-dark green-red,0.7506,17.02,12.63,,,
-45,pink-light green-pink,0.6543,16.21,12.06,,,
-46,pink-light green-pink-dark green,0.6289,15.25,12.39,,,
-47,pink-light green-pink-light green,0.6914,16.65,12.51,,,
-48,pink-light green-pink-red,0.6616,15.95,12.62,,,
-49,pink-light green-red,0.8187,18.02,13.81,,,
-50,pink-light green-red-dark green,0.6515,15.88,12.42,,,
-51,pink-light green-red-light green,0.7172,16.66,12.21,,,
-52,pink-light green-red-pink,0.6251,15.33,11.72,,,
-53,pink-red,0.7745,17.25,13.06,,,
-54,pink-red-dark green,0.709,16.18,12.21,,,
-55,pink-red-dark green-light green,0.7989,17.38,13.69,,,
-56,pink-red-dark green-pink,1.3053,19.83,15.29,,,
-57,pink-red-dark green-red,0.8365,18.18,13.45,,,
-58,pink-red-light green,0.6475,14.67,12.07,,,
-59,pink-red-light green-dark green,1.0543,18.31,14,,,
-60,pink-red-light green-pink,0.6612,16.28,12.71,,,
-61,pink-red-light green-red,0.8904,17.56,13.22,,,
-62,pink-red-pink,0.7782,16.35,12.37,,,
-63,pink-red-pink-dark green,0.6816,16.44,12.09,,,
-64,pink-red-pink-light green,0.6364,16.03,12.2,,,
-65,pink-red-pink-red,0.6353,15.98,12.47,,,
-66,red,0.8712,17.92,13.32,,,
-67,red-dark green,0.5992,15.27,11.25,,,
-68,red-dark green-light green,0.5916,14.92,12.06,,,
-69,red-dark green-light green-red,1.3237,20.73,14.55,,,
-70,red-dark green-light green-dark green,0.7958,16.33,13.57,,,
-71,red-dark green-light green-pink,0.7872,16.56,13.04,,,
-72,red-dark green-pink,1.0198,19.11,13.92,,,
-73,red-dark green-pink-red,0.5863,15.55,12.07,,,
-74,red-dark green-pink- light green,0.6439,16.31,12.77,,,
-75,red-dark green-pink-dark green,0.6657,16,12.5,,,
-76,red-dark green-red,0.6362,15.35,12.27,,,
-77,red-dark green-red-light green,0.7277,17,12.76,,,
-78,red-dark green-red-dark green,0.7334,16.55,11.3,,,
-79,red-dark green-red-pink,0.5991,15.34,11.93,,,
-80,red-light green,0.5869,14.99,12.24,,,
-81,red-light green- dark green,0.8199,17.12,13.48,,,
-82,red-light green- dark green-red,0.5761,14.56,12.2,,,
-83,red-light green- dark green-pink,0.8913,17.72,13.85,,,
-84,red-light green- dark green-light green,0.5408,14.67,12.18,,,
-85,red-light green-pink,0.9259,18.73,13.79,,,
-86,red-light green-pink-red,0.9802,18.11,13.74,,,
-87,red-light green-pink-light green,0.6162,15.97,15.98,,,
-88,red-light green-pink-dark green,0.5767,15.44,11.93,,,
-89,red-light green-red,0.6121,14.16,12.62,,,
-90,red-light green-red-pink,0.533,15.28,11.44,,,
-91,red-light green-red-light green,0.6428,15.52,12.45,,,
-92,red-light green-red-dark green,0.9256,18.34,14.34,,,
-93,red-pink,0.5568,15.02,11.84,,,
-94,red-pink-light green,0.5657,15.72,11.95,,,
-95,red-pink-light green-pink,0.6885,16.17,12.19,,,
-96,red-pink-light green-dark green,1.028,19.37,14.25,,,
-97,red-pink-light green-red,0.9303,18.04,13.64,,,
-98,red-pink-dark green,0.647,16.29,12.11,,,
-99,red-pink-dark green-red,0.5379,14.76,11.69,,,
-100,red-pink-dark green-light green,0.7247,15.92,13.19,,,
-101,red-pink-dark green-pink,0.7815,16.53,12.04,,,
-102,red-pink-red,0.8843,17.31,12.54,,,
-103,red-pink-red-pink,1.2958,19.78,14.43,,,
-104,red-pink-red-light green,0.6086,16.3,11.8,,,
-105,red-pink-red-dark green,0.7189,16.6,12.85,,,
-106,dark green-light green-dark green-light green,0.8378,17.07,12.87,,,
-107,dark green-light green-dark green-pink,0.5761,15.17,12.14,,,
-108,dark green-light green-dark green-red,1.0215,17.97,14.41,,,
-109,dark green-light green-pink-red,0.7296,16.71,12.97,,,
-110,dark green-light green-pink-light green,1.0465,18.87,13.77,,,
-111,dark green-light green-pink-dark green,0.6415,15.84,11.5,,,
-112,dark green-light green-red-pink,0.4696,14.2,11.25,,,
+﻿snail_ID,snail_colors,blotted_wet_weight_g,shell_length_mm,shell_width_mm,tank,pH,temp,
+64,pink-red-pink-light green,0.6364,16.03,12.2,0,,,
+95,red-pink-light green-pink,0.6885,16.17,12.19,-1,,,
+55,pink-red-dark green-light green,0.7989,17.38,13.69,0,,,
+1,dark green,1.6355,21.46,15.82,0,,,
+3,dark green-light green-dark green,0.5565,14.77,11.69,0,,,
+112,dark green-light green-red-pink,0.4696,14.2,11.25,0,,,
+13,dark green-red-pink,1.1052,18.53,13.97,0,,,
+15,light green-dark green,1.2744,20.82,13.38,0,,,
+18,light green-dark green-red,1.0754,18.68,13.88,0,,,
+30,pink-dark green-light green-pink,1.1327,19.39,14,0,,,
+31,pink-dark green-light green-red,0.5559,14.7,11.56,0,,,
+33,pink-dark green-pink-dark green,0.5527,14.38,11.71,0,,,
+38,pink-dark green-red-light green,1.1451,18.97,14.76,0,,,
+41,pink-light green-dark green,0.4901,15.14,11.5,0,,,
+56,pink-red-dark green-pink,1.3053,19.83,15.29,0,,,
+69,red-dark green-light green-red,1.3237,20.73,14.55,0,,,
+72,red-dark green-pink,1.0198,19.11,13.92,0,,,
+84,red-light green-dark green-light green,0.5408,14.67,12.18,0,,,
+90,red-light green-red-pink,0.533,15.28,11.44,0,,,
+99,red-pink-dark green-red,0.5379,14.76,11.69,0,,,
+23,light green-red,0.8177,16.63,13.12,0,,,
+103,red-pink-red-pink,1.2958,19.78,14.43,0,,,
+109,dark green-light green-pink-red,0.7296,16.71,12.97,1,7.6,22,161641
+16,light green-dark green-light green,0.7244,15.65,12.51,1,7.6,22,161623
+66,red,0.8712,17.92,13.32,1,7.6,22,161628
+93,red-pink,0.5568,15.02,11.84,1,7.6,22,161688
+100,red-pink-dark green-light green,0.7247,15.92,13.19,1,7.6,22,161669
+34,pink-dark green-pink-light green,0.9021,17.74,12.58,2,7.4,18,161686
+35,pink-dark green-pink-red,0.9115,18.21,13.31,2,7.4,18,161616
+46,pink-light green-pink-dark green,0.6289,15.25,12.39,2,7.4,18,161617
+68,red-dark green-light green,0.5916,14.92,12.06,2,7.4,18,161620
+74,red-dark green-pink-light green,0.6439,16.31,12.77,2,7.4,18,161618
+47,pink-light green-pink-light green,0.6914,16.65,12.51,3,7.8,22,161679
+80,red-light green,0.5869,14.99,12.24,3,7.8,22,161676
+81,red-light green-dark green,0.8199,17.12,13.48,3,7.8,22,161678
+83,red-light green-dark green-pink,0.8913,17.72,13.85,3,7.8,22,161655
+88,red-light green-pink-dark green,0.5767,15.44,11.93,3,7.8,22,161651
+2,dark green-light green,0.9822,19.1,13.63,4,7.3,18,161624
+14,light green,0.9787,19.41,13.45,4,7.3,18,161630
+58,pink-red-light green,0.6475,14.67,12.07,4,7.3,18,161652
+67,red-dark green,0.5992,15.27,11.25,4,7.3,18,161622
+98,red-pink-dark green,0.647,16.29,12.11,4,7.3,18,161621
+12,dark green-red-light green,0.6003,14.91,11.77,5,7.7,18,161683
+21,light green-pink-light green,0.7553,17.12,12.83,5,7.7,18,161681
+26,light green-red-pink,0.5699,15.46,11.36,5,7.7,18,161692
+71,red-dark green-light green-pink,0.7872,16.56,13.04,5,7.7,18,tag
+86,red-light green-pink-red,0.9802,18.11,13.74,5,7.7,18,161685
+24,light green-red-dark green,0.8915,16.78,13.63,6,7.9,18,161694
+49,pink-light green-red,0.8187,18.02,13.81,6,7.9,18,161611
+52,pink-light green-red-pink,0.6251,15.33,11.72,6,7.9,18,161613
+54,pink-red-dark green,0.709,16.18,12.21,6,7.9,18,161607
+79,red-dark green-red-pink,0.5991,15.34,11.93,6,7.9,18,161609
+8,dark green-pink-light green,0.8306,17.54,13.38,7,7.5,18,161644
+9,dark green-pink-red,0.6976,15.88,12.13,7,7.5,18,161658
+108,dark green-light green-dark green-red,1.0215,17.97,14.41,7,7.5,18,161601
+63,pink-red-pink-dark green,0.6816,16.44,12.09,7,7.5,18,161637
+92,red-light green-red-dark green,0.9256,18.34,14.34,7,7.5,18,161643
+4,dark green-light green-pink,0.8315,16.62,12.13,8,7.6,18,161696
+28,pink-dark green,0.6306,15.71,11.36,8,7.6,18,161675
+85,red-light green-pink,0.9259,18.73,13.79,8,7.6,18,161673
+94,red-pink-light green,0.5657,15.72,11.95,8,7.6,18,161693
+59,pink-red-light green-dark green,1.0543,18.31,14,8,7.6,18,
+111,dark green-light green-pink-dark green,0.6415,15.84,11.5,9,7.2,18,161689
+17,light green-dark green-pink,0.6872,16.22,11.9,9,7.2,18,161677
+42,pink-light green-dark green-light green,0.7325,16.18,12.74,9,7.2,18,no tag
+43,pink-light green-dark green-pink,0.5794,15.25,11.89,9,7.2,18,161657
+57,pink-red-dark green-red,0.8365,18.18,13.45,9,7.2,18,161636
+36,pink-dark green-red,0.7496,16.42,12.57,10,7.8,18,161629
+76,red-dark green-red,0.6362,15.35,12.27,10,7.8,18,161654
+78,red-dark green-red-dark green,0.7334,16.55,11.3,10,7.8,18,161653
+89,red-light green-red,0.6121,14.16,12.62,10,7.8,18,161626
+97,red-pink-light green-red,0.9303,18.04,13.64,10,7.8,18,no tag
+11,dark green-red-dark green,0.9899,18.37,13.88,11,7.5,22,161634
+32,pink-dark green-pink,0.5875,15.47,12.08,11,7.5,22,161631
+44,pink-light green-dark green-red,0.7506,17.02,12.63,11,7.5,22,161633
+45,pink-light green-pink,0.6543,16.21,12.06,11,7.5,22,161700
+50,pink-light green-red-dark green,0.6515,15.88,12.42,11,7.5,22,161697
+5,dark green-light green-red,0.9675,18.26,12.59,12,7.4,22,161604
+29,pink-dark green-light green,0.6444,16.19,12.09,12,7.4,22,161649
+87,red-light green-pink-light green,0.6162,15.97,15.98,12,7.4,22,161640
+101,red-pink-dark green-pink,0.7815,16.53,12.04,12,7.4,22,161647
+104,red-pink-red-light green,0.6086,16.3,11.8,12,7.4,22,161684
+7,dark green-pink-dark green,0.6714,16.63,12.45,13,8,18,161661
+25,light green-red-light green,0.7719,16.94,12.78,13,8,18,161635
+40,pink-light green,0.66,16.41,12.35,13,8,18,161663
+51,pink-light green-red-light green,0.7172,16.66,12.21,13,8,18,161662
+53,pink-red,0.7745,17.25,13.06,13,8,18,161664
+19,light green-pink,0.5933,15.62,11.54,14,7.2,22,orange
+60,pink-red-light green-pink,0.6612,16.28,12.71,14,7.2,22,green
+61,pink-red-light green-red,0.8904,17.56,13.22,14,7.2,22,161690
+70,red-dark green-light green-dark green,0.7958,16.33,13.57,14,7.2,22,blue
+75,red-dark green-pink-dark green,0.6657,16,12.5,14,7.2,22,yellow
+106,dark green-light green-dark green-light green,0.8378,17.07,12.87,15,7.7,22,161625
+6,dark green-pink,0.6258,15.46,11.45,15,7.7,22,161608
+110,dark green-light green-pink-light green,1.0465,18.87,13.77,15,7.7,22,161695
+62,pink-red-pink,0.7782,16.35,12.37,15,7.7,22,161614
+91,red-light green-red-light green,0.6428,15.52,12.45,15,7.7,22,161612
+22,light green-pink-red,0.6852,16.05,11.97,17,7.9,22,161672
+27,pink,0.8567,18.03,13.33,17,7.9,22,161645
+73,red-dark green-pink-red,0.5863,15.55,12.07,17,7.9,22,161671
+77,red-dark green-red-light green,0.7277,17,12.76,17,7.9,22,no tag
+82,red-light green-dark green-red,0.5761,14.56,12.2,17,7.9,22,
+107,dark green-light green-dark green-pink,0.5761,15.17,12.14,18,7.3,22,161648
+37,pink-dark green-red-dark green,0.9211,18.55,13.18,18,7.3,22,161656
+39,pink-dark green-red-pink,0.7745,17.54,13.43,18,7.3,22,161666
+65,pink-red-pink-red,0.6353,15.98,12.47,18,7.3,22,161605
+102,red-pink-red,0.8843,17.31,12.54,18,7.3,22,161603
+10,dark green-red,0.6737,17.04,12.68,19,8,22,161682
+20,light green-pink-dark green,0.9165,17.83,13.97,19,8,22,161639
+96,red-pink-light green-dark green,1.028,19.37,14.25,19,8,22,161670
+48,pink-light green-pink-red,0.6616,15.95,12.62,19,8,22,161646
+105,red-pink-red-dark green,0.7189,16.6,12.85,19,8,22,161659
