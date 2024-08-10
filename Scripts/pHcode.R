@@ -14,13 +14,13 @@ library(patchwork)
 
 ## bring in pH calibration files and raw data files
 
-TrisCalibrationLog<- read.csv("Data/tris_cal.csv")
+TrisCalibrationLog<- read.csv("Data/pH_temp/tris_cal.csv")
 
 pHcalib<-TrisCalibrationLog %>%
   mutate(TrisCalDate = ymd(date))
 
 
-pHData<-read.csv("Data/pH_temp.csv")
+pHData<-read.csv("Data/pH_temp/pH_temp.csv")
 pHData<-pHData%>%
   mutate(TrisCalDate = ymd(TrisCalDate),
          Sampling_Date = ymd(date))
