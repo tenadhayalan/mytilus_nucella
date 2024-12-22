@@ -1,0 +1,127 @@
+---
+title: "TA_calc"
+author: "Tena Dhayalan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning=FALSE, 
+                      message=FALSE)
+```
+
+## Loading libraries 
+```{r}
+library(dplyr)
+library(broom)
+library(purrr)
+library(lubridate)
+library(tidyverse)
+library(nlstools)
+library(here)
+library(stringr)
+
+```
+
+## Load datasets 
+
+```{r}
+respo <- read_csv(here("Data","PR_2024","Metadata.csv"))
+calc <- read_csv(here("Data", "TA", "Calcification_mussel.csv"))
+```
+
+### Data cleaning
+```{r}
+respo$ID <- as.character(respo$ID)
+```
+
+### Calculating calcification based on TA 
+
+```{r}
+#get initial data
+rows.initial <- which(calc$sample_type == "Initial") #tells you all the rows that you have with initial
+initial <- calc[rows.initial,]
+
+#take means of initial data
+initial_mean <- initial %>%
+  group_by(tank) %>%
+  summarise(TA_initial = mean(TA))
+
+#bring initials into data frame by tank
+calc <- calc %>%
+  left_join(initial_mean, by= c("tank"))
+
+
+#get blank data
+rows.blank <- which(calc$sample_type == "Blank") #tells you all the rows that you have with blank
+blanks <- calc[rows.blank,]
+
+#figure out delta TA, initial-final
+
+blanks$delta.TA.blank <- blanks$TA_initial - blanks$TA
+
+#add blank column
+mean.blanks <- blanks %>% 
+  group_by(tank) %>%
+  summarise(mean.blanks=mean(delta.TA.blank)) 
+
+calc <- left_join(calc, mean.blanks) #bring in mean blanks to calc.data
+
+#bring in time, mass, volume
+
+time.data <- respo[, c("ID", "tank", "pH_treatment", "temp_treatment", "volume", "wet_weight", "TA.start", "TA.stop")] 
+calc$tank <- as.character(calc$tank) # convert tank to character to join
+time.data$tank <- as.character(time.data$tank)
+
+full.calc <- left_join(calc, time.data)
+
+##get rid of NAs
+clean.full.calc <- full.calc %>%
+  filter(!is.na(TA.start))
+
+#adjust the time information and format
+clean.full.calc$TA.start <- strptime(as.character(clean.full.calc$TA.start), "%H:%M:%S")
+clean.full.calc$TA.stop <- strptime(as.character(clean.full.calc$TA.stop), "%H:%M:%S")
+#calculate the NEC rate
+
+clean.full.calc$deltaTA<- (clean.full.calc$TA_initial - clean.full.calc$TA) - clean.full.calc$mean.blanks
+clean.full.calc$timediff <- as.numeric((clean.full.calc$TA.stop - clean.full.calc$TA.start)) 
+
+#convert volume from mL to L
+clean.full.calc$volume <- clean.full.calc$volume * 0.001
+
+#equation to calculate NEC rates 
+
+clean.full.calc$umol.cm2.hr<-((clean.full.calc$deltaTA/2)*(1.025)*(clean.full.calc$volume))/((clean.full.calc$wet_weight)*(clean.full.calc$timediff))
+
+
+write_csv(clean.full.calc, here("Data","TA","NEC.csv"))
+
+## check blanks
+
+blanks %>%
+  ggplot(aes(x=tank, y=TA))+
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  labs(title="Blanks")
+
+initial %>%
+  ggplot(aes(x=tank, y=TA))+
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  labs(title="Initial")
+
+## try plotting 
+ggplot(data=clean.full.calc, aes(x=pH_treatment, y=umol.cm2.hr, group = interaction(pH_treatment, temp_treatment), color=as.factor(temp_treatment)))+
+  geom_boxplot(outlier.shape=NA) +
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  scale_color_manual(values=c("salmon", "salmon4"))+
+  labs(x = "pH",
+       color = "Temperature",
+       y = "Rate (umol CO3 g-1 hr-1)")
+```
