@@ -1,5 +1,5 @@
 ---
-title: "TA_calc_mussels"
+title: "TA_calc_nucella"
 author: "Tena Dhayalan"
 date: "`r Sys.Date()`"
 output: html_document
@@ -28,7 +28,7 @@ library(stringr)
 
 ```{r}
 respo <- read_csv(here("Data","PR_2024","Metadata.csv"))
-calc <- read_csv(here("Data", "TA", "Calcification_mussel.csv"))
+calc <- read_csv(here("Data", "TA", "Calcification_nucella.csv"))
 ```
 
 ### Data cleaning

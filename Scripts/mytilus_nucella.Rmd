@@ -1,0 +1,54 @@
+---
+title: "TA_calc_mussels"
+author: "Tena Dhayalan"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      warning=FALSE, 
+                      message=FALSE)
+```
+
+## Loading libraries 
+```{r,echo=FALSE, message=FALSE}
+library(dplyr)
+library(broom)
+library(purrr)
+library(lubridate)
+library(tidyverse)
+library(nlstools)
+library(here)
+library(stringr)
+library(lmerTest)
+library(lme4)
+library(knitr)
+require(kableExtra)
+library(tidyverse)
+library(car)
+options(knitr.table.format = "html")
+```
+
+## Load data
+```{r}
+calc <- read_csv(here("Data", "TA", "NEC.csv")) # calcification 
+tankpH <- read_csv(here("Data", "pH_temp", "ph_temp_final_cut.csv.")) # ph and temp data
+respo <- read_csv(here("Data", "PR_2024", "Respo_final.csv")) # respo
+Sample.Info <- read_csv(here("Data", "PR_2024", "Metadata.csv")) # respo metadata
+```
+
+## Mess with data
+```{r}
+tankpHavg <- aggregate(cbind(pH,TempInSitu) ~ tank, data = tankpH, FUN = mean) # calculate avg pHs per tank
+
+Sample.Info <-
+  Sample.Info %>%
+  left_join(tankpHavg, by = "tank")
+
+```
+
+# Mussels
+```{r}
+
+```
