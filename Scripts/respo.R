@@ -64,6 +64,7 @@ Sample.Info$stop.time <- as.POSIXct(Sample.Info$stop.time,format="%H:%M:%S", tz 
 #view(Sample.Info)
 
 ###forloop#####
+
 for (i in 1: length(file.names.full)) {
   FRow<-which(Sample.Info$FileName==strsplit(file.names[i], '.csv')) #stringsplit this renames our file
   Respo.Data1 <-read_csv(file.path(path.p, file.names.full[i]), skip = 1) %>%
@@ -138,7 +139,6 @@ Respo.R <- read_csv(here("Data",
 
 # Calculate Respiration rate
 
-Sample.Info$BLANK <- as.factor(Sample.Info$BLANK)
 Respo.R<-Respo.R %>%
   left_join(Sample.Info) %>% # Join the raw respo calculations with the metadata
   drop_na(FileName) %>% # drop NAs
@@ -150,91 +150,41 @@ Respo.R<-Respo.R %>%
 #View(Respo.R)
 
 
-#Account for blank rate by light/Dark and Block (if we do one blank per block)
-
 #View(Respo.R)
 
 # Step 1: Normalize respiration data
 Respo.R.Normalized <- Respo.R %>%
-  group_by(block, pH_treatment, Species, BLANK) %>%
+  group_by(block, tank, BLANK) %>%
   summarise(umol.sec = mean(umol.sec, na.rm = TRUE), .groups = 'drop') %>%
   filter(BLANK == 1) %>%
-  dplyr::select(block, pH_treatment, Species, blank.rate = umol.sec) %>%
-  right_join(Respo.R, by = c("block", "pH_treatment", "Species")) %>%
+  dplyr::select(block, tank, blank.rate = umol.sec) %>%
+  right_join(Respo.R, by = c("block", "tank")) %>%
   mutate(
-    dry_weight = as.numeric(as.character(AFDW)), # Convert to numeric
     umol.sec.corr = umol.sec - blank.rate,
     umol.gram.hr = ((umol.sec.corr * 3600) / AFDW)) %>%
-  filter(BLANK == 0)
+  filter(BLANK == 0) %>%
+  rename(Respiration = umol.gram.hr)
 
-# Step 1: Summarize Respiration and NetPhoto values by SampleID
-combined_values <- Respo.R_Normalized %>%
-  group_by(Species,ID) %>% # Replace SampleID with your actual sample ID column name
-  summarise(
-    Respiration = sum(Respiration, na.rm = TRUE), # Summing Respiration values
-   # NetPhoto = sum(NetPhoto, na.rm = TRUE), # Summing NetPhoto values
-    .groups = 'drop' # Optional: to ungroup after summarizing
-  )
+Respo.R.Normalized <- Respo.R.Normalized %>%  
+  mutate(Respiration = -Respiration)# Make respiration positive by negating it
 
-# Step 2: Join the combined values back to the original dataset
-Respo.R_Normalized <- Respo.R_Normalized %>%
-  left_join(combined_values, by = c("Species","ID")) # Replace SampleID with your actual sample ID column name
-
-# Optional: If you want to keep only one set of Respiration and NetPhoto columns, you can do:
-Respo.R_Normalized <- Respo.R_Normalized %>%
-  mutate(
-    Respiration = ifelse(!is.na(Respiration.x), Respiration.x, Respiration.y), # Choose non-NA value
-    NetPhoto = ifelse(!is.na(NetPhoto.x), NetPhoto.x, NetPhoto.y) # Choose non-NA value
-  ) %>%
-  select(-Respiration.x, -Respiration.y, -NetPhoto.x, -NetPhoto.y) # Remove duplicate columns
-
-Respo.R_Normalized <- Respo.R_Normalized %>%  
-  mutate(Respiration = -Respiration,# Make respiration positive by negating it
-         GrossPhoto = ifelse(!is.na(Respiration) & !is.na(NetPhoto), Respiration + NetPhoto, NA)
-  )
-
-write_csv(Respo.R_Normalized,here("Data",
+write_csv(Respo.R.Normalized,here("Data",
                                   "PR_2024",
-                                  "PR_final_normalized_dry_clean.csv"))# export all the uptake rates
+                                  "PR_final_normalized_dry.csv"))# export all the uptake rates
 
 #####------plot------####
 
 # look at blanks
 Respo.R %>% 
   filter(BLANK == "1") %>%
-  filter(Species == "Rockweed") %>%
+  filter(Species == "Mussel") %>%
   ggplot(aes(x=as.factor(pH_treatment),y=umol.L.sec, group = interaction(pH_treatment, temp_treatment), color=temp_treatment))+
   geom_boxplot(outlier.shape = NA)+
   geom_point()
 
 Respo.R %>% 
   filter(BLANK == "1") %>%
-  filter(Species == "Tegula") %>%
+  filter(Species == "Nucella") %>%
   ggplot(aes(x=as.factor(pH_treatment),y=umol.L.sec, group = interaction(pH_treatment, temp_treatment), color=temp_treatment))+
   geom_boxplot(outlier.shape = NA)+
   geom_point()
-
-# make plot x pH y respiration and color temperature
-
-Respo.R_Normalized %>% 
-  mutate(gp=Light+Respiration) %>%
-  ggplot(aes(x=as.factor(pH_treatment), y=gp, color=as.factor(temp_treatment)))+
-  geom_point()+
-  geom_boxplot(outlier.shape = NA)
-
-# resp
-Respo.R_Normalized %>% 
-  ggplot(aes(x=as.factor(pH_treatment), y=Respiration, color=as.factor(temp_treatment)))+
-  geom_boxplot(outlier.shape = NA)+
-  geom_point()+
-  facet_wrap(~Species, scales = "free_y")
-
-#p v r
-Respo.R_Normalized %>% 
-  mutate(gp=Light+Respiration, 
-         pr=gp/Respiration) %>%
-  ggplot(aes(x=as.factor(pH_treatment), y=pr, color=as.factor(temp_treatment)))+
-  geom_boxplot()
-
-
-#r v c for tegula

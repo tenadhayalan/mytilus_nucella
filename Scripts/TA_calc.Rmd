@@ -28,7 +28,10 @@ library(stringr)
 
 ```{r}
 respo <- read_csv(here("Data","PR_2024","Metadata.csv"))
-calc <- read_csv(here("Data", "TA", "Calcification_mussel.csv"))
+Mcalc <- read_csv(here("Data", "TA", "Calcification_mussel_clean.csv"))
+Ncalc <- read_csv(here("Data", "TA", "Calcification_nucella_clean.csv"))
+Mafdw <- read_csv(here("Data", "afdw", "mussel_afdw.csv"))
+Nafdw <- read_csv(here("Data", "afdw", "nucella_afdw.csv"))
 ```
 
 ### Data cleaning
@@ -36,12 +39,11 @@ calc <- read_csv(here("Data", "TA", "Calcification_mussel.csv"))
 respo$ID <- as.character(respo$ID)
 ```
 
-### Calculating calcification based on TA 
-
+# Mussels 
 ```{r}
 #get initial data
-rows.initial <- which(calc$sample_type == "Initial") #tells you all the rows that you have with initial
-initial <- calc[rows.initial,]
+rows.initial <- which(Mcalc$sample_type == "Initial") #tells you all the rows that you have with initial
+initial <- Mcalc[rows.initial,]
 
 #take means of initial data
 initial_mean <- initial %>%
@@ -49,13 +51,13 @@ initial_mean <- initial %>%
   summarise(TA_initial = mean(TA))
 
 #bring initials into data frame by tank
-calc <- calc %>%
+Mcalc <- Mcalc %>%
   left_join(initial_mean, by= c("tank"))
 
 
 #get blank data
-rows.blank <- which(calc$sample_type == "Blank") #tells you all the rows that you have with blank
-blanks <- calc[rows.blank,]
+rows.blank <- which(Mcalc$sample_type == "Blank") #tells you all the rows that you have with blank
+blanks <- Mcalc[rows.blank,]
 
 #figure out delta TA, initial-final
 
@@ -66,36 +68,138 @@ mean.blanks <- blanks %>%
   group_by(tank) %>%
   summarise(mean.blanks=mean(delta.TA.blank)) 
 
-calc <- left_join(calc, mean.blanks) #bring in mean blanks to calc.data
+Mcalc <- left_join(Mcalc, mean.blanks) #bring in mean blanks to calc.data
 
 #bring in time, mass, volume
 
-time.data <- respo[, c("ID", "tank", "pH_treatment", "temp_treatment", "volume", "wet_weight", "TA.start", "TA.stop")] 
-calc$tank <- as.character(calc$tank) # convert tank to character to join
+time.data <- respo %>%
+  filter(Species == "Mussel") %>%
+  dplyr::select(c("ID", "tank", "pH_treatment", "temp_treatment", "volume", "wet_weight", "TA.start", "TA.stop", "Species", "block")) 
+
+Mcalc$tank <- as.character(Mcalc$tank) # convert tank to character to join
 time.data$tank <- as.character(time.data$tank)
 
-full.calc <- left_join(calc, time.data)
+full.Mcalc <- left_join(Mcalc, time.data) %>%
+  left_join(Mafdw %>%
+              mutate(ID = as.character(ID)) %>%
+              dplyr::select(ID, dry_shell), by = "ID")
 
 ##get rid of NAs
-clean.full.calc <- full.calc %>%
+clean.full.Mcalc <- full.Mcalc %>%
   filter(!is.na(TA.start))
 
 #adjust the time information and format
-clean.full.calc$TA.start <- strptime(as.character(clean.full.calc$TA.start), "%H:%M:%S")
-clean.full.calc$TA.stop <- strptime(as.character(clean.full.calc$TA.stop), "%H:%M:%S")
+clean.full.Mcalc$TA.start <- strptime(as.character(clean.full.Mcalc$TA.start), "%H:%M:%S")
+clean.full.Mcalc$TA.stop <- strptime(as.character(clean.full.Mcalc$TA.stop), "%H:%M:%S")
 #calculate the NEC rate
 
-clean.full.calc$deltaTA<- (clean.full.calc$TA_initial - clean.full.calc$TA) - clean.full.calc$mean.blanks
-clean.full.calc$timediff <- as.numeric((clean.full.calc$TA.stop - clean.full.calc$TA.start)) 
+clean.full.Mcalc$deltaTA<- (clean.full.Mcalc$TA_initial - clean.full.Mcalc$TA) - clean.full.Mcalc$mean.blanks
+clean.full.Mcalc$timediff <- as.numeric((clean.full.Mcalc$TA.stop - clean.full.Mcalc$TA.start)) 
 
 #convert volume from mL to L
-clean.full.calc$volume <- clean.full.calc$volume * 0.001
+clean.full.Mcalc$volume <- clean.full.Mcalc$volume * 0.001
 
 #equation to calculate NEC rates 
 
-clean.full.calc$umol.cm2.hr<-((clean.full.calc$deltaTA/2)*(1.025)*(clean.full.calc$volume))/((clean.full.calc$wet_weight)*(clean.full.calc$timediff))
+clean.full.Mcalc$umol.cm2.hr <-((clean.full.Mcalc$deltaTA/2)*(1.025)*(clean.full.Mcalc$volume))/((clean.full.Mcalc$dry_shell)*(clean.full.Mcalc$timediff))
 
 
+#write_csv(clean.full.calc, here("Data","TA","NEC.csv"))
+
+## check blanks
+
+blanks %>%
+  ggplot(aes(x=tank, y=TA))+
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  labs(title="Blanks")
+
+initial %>%
+  ggplot(aes(x=tank, y=TA))+
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  labs(title="Initial")
+
+## try plotting 
+ggplot(data=clean.full.Mcalc, aes(x=pH_treatment, y=umol.cm2.hr, group = interaction(pH_treatment, temp_treatment), color=as.factor(temp_treatment)))+
+  geom_boxplot(outlier.shape=NA) +
+  geom_point()+
+  theme_bw() +
+  theme(strip.background = element_rect(fill = "white"))+
+  scale_color_manual(values=c("salmon", "salmon4"))+
+  labs(x = "pH",
+       color = "Temperature",
+       y = "Rate (umol CO3 g-1 hr-1)")
+```
+
+# Nucella 
+```{r}
+#get initial data
+rows.initial <- which(Ncalc$sample_type == "Initial") #tells you all the rows that you have with initial
+initial <- Ncalc[rows.initial,]
+
+#take means of initial data
+initial_mean <- initial %>%
+  group_by(tank) %>%
+  summarise(TA_initial = mean(TA))
+
+#bring initials into data frame by tank
+Ncalc <- Ncalc %>%
+  left_join(initial_mean, by= c("tank"))
+
+
+#get blank data
+rows.blank <- which(Ncalc$sample_type == "Blank") #tells you all the rows that you have with blank
+blanks <- Ncalc[rows.blank,]
+
+#figure out delta TA, initial-final
+
+blanks$delta.TA.blank <- blanks$TA_initial - blanks$TA
+
+#add blank column
+mean.blanks <- blanks %>% 
+  group_by(tank) %>%
+  summarise(mean.blanks=mean(delta.TA.blank)) 
+
+Ncalc <- left_join(Ncalc, mean.blanks) #bring in mean blanks to calc.data
+
+#bring in time, mass, volume
+
+time.data <- respo %>%
+  filter(Species == "Nucella") %>%
+  dplyr::select(c("ID", "tank", "pH_treatment", "temp_treatment", "volume", "wet_weight", "TA.start", "TA.stop", "Species", "block")) 
+
+Ncalc$tank <- as.character(Ncalc$tank) # convert tank to character to join
+time.data$tank <- as.character(time.data$tank)
+
+full.Ncalc <- left_join(Ncalc, time.data) %>%
+  left_join(Nafdw %>%
+              mutate(ID = as.character(ID)) %>%
+              dplyr::select(ID, dry_shell), by = "ID")
+
+##get rid of NAs
+clean.full.Ncalc <- full.Ncalc %>%
+  filter(!is.na(TA.start))
+
+#adjust the time information and format
+clean.full.Ncalc$TA.start <- strptime(as.character(clean.full.Ncalc$TA.start), "%H:%M:%S")
+clean.full.Ncalc$TA.stop <- strptime(as.character(clean.full.Ncalc$TA.stop), "%H:%M:%S")
+#calculate the NEC rate
+
+clean.full.Ncalc$deltaTA<- (clean.full.Ncalc$TA_initial - clean.full.Ncalc$TA) - clean.full.Ncalc$mean.blanks
+clean.full.Ncalc$timediff <- as.numeric((clean.full.Ncalc$TA.stop - clean.full.Ncalc$TA.start)) 
+
+#convert volume from mL to L
+clean.full.Ncalc$volume <- clean.full.Ncalc$volume * 0.001
+
+#equation to calculate NEC rates 
+
+clean.full.Ncalc$umol.cm2.hr <-((clean.full.Ncalc$deltaTA/2)*(1.025)*(clean.full.Ncalc$volume))/((clean.full.Ncalc$dry_shell)*(clean.full.Ncalc$timediff))
+
+clean.full.calc <- clean.full.Ncalc %>%
+  bind_rows(clean.full.Mcalc)
 write_csv(clean.full.calc, here("Data","TA","NEC.csv"))
 
 ## check blanks
@@ -115,7 +219,7 @@ initial %>%
   labs(title="Initial")
 
 ## try plotting 
-ggplot(data=clean.full.calc, aes(x=pH_treatment, y=umol.cm2.hr, group = interaction(pH_treatment, temp_treatment), color=as.factor(temp_treatment)))+
+ggplot(data=clean.full.Ncalc, aes(x=pH_treatment, y=umol.cm2.hr, group = interaction(pH_treatment, temp_treatment), color=as.factor(temp_treatment)))+
   geom_boxplot(outlier.shape=NA) +
   geom_point()+
   theme_bw() +
