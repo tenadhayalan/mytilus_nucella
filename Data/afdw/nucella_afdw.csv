@@ -1,4 +1,4 @@
-﻿snail_ID,snail_colors,pan,dry_snail_pan,ashed,dry_weight,shell_pan,dry_shell_pan,dry_shell,shell_length,shell_width,shell_growth
+﻿ID,snail_colors,pan,dry_snail_pan,ashed,dry_weight,shell_pan,dry_shell_pan,dry_shell,shell_length,shell_width,shell_growth
 2,dark green-light green,,1.0147,0.9753,0.0394,0.9644,1.7659,0.8015,19.74,14.89,2.54
 4,dark green-light green-pink,,1.0235,0.9715,0.052,0.9805,1.6729,0.6924,18.82,14.12,6.46
 5,dark green-light green-red,,1.0634,0.9844,0.079,0.9627,1.7289,0.7662,19.03,13.57,3.01
