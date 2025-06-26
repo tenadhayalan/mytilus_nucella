@@ -1,4 +1,4 @@
-﻿snail_ID,snail_colors,blotted_wet_weight_g,shell_length_mm,shell_width_mm,tank,pH,temp,
+﻿ID,snail_colors,wet_weight_initial,shell_length_initial,shell_width_initial,tank,pH,temp,
 64,pink-red-pink-light green,0.6364,16.03,12.2,0,,,
 95,red-pink-light green-pink,0.6885,16.17,12.19,-1,,,
 55,pink-red-dark green-light green,0.7989,17.38,13.69,0,,,
