@@ -27,7 +27,7 @@ library(stringr)
 ## Load datasets 
 
 ```{r}
-respo <- read_csv(here("Data","PR_2024","Metadata.csv"))
+respo <- read_csv(here("Data","PR_2024","Metadata_full.csv"))
 Mcalc <- read_csv(here("Data", "TA", "Calcification_mussel_clean.csv"))
 Ncalc <- read_csv(here("Data", "TA", "Calcification_nucella_clean.csv"))
 Mafdw <- read_csv(here("Data", "afdw", "mussel_afdw.csv"))
@@ -82,7 +82,7 @@ time.data$tank <- as.character(time.data$tank)
 full.Mcalc <- left_join(Mcalc, time.data) %>%
   left_join(Mafdw %>%
               mutate(ID = as.character(ID)) %>%
-              dplyr::select(ID, dry_shell), by = "ID")
+              dplyr::select(ID, dry_weight))
 
 ##get rid of NAs
 clean.full.Mcalc <- full.Mcalc %>%
@@ -101,7 +101,7 @@ clean.full.Mcalc$volume <- clean.full.Mcalc$volume * 0.001
 
 #equation to calculate NEC rates 
 
-clean.full.Mcalc$umol.cm2.hr <-((clean.full.Mcalc$deltaTA/2)*(1.025)*(clean.full.Mcalc$volume))/((clean.full.Mcalc$dry_shell)*(clean.full.Mcalc$timediff))
+clean.full.Mcalc$umol.cm2.hr <-((clean.full.Mcalc$deltaTA/2)*(1.025)*(clean.full.Mcalc$volume))/((clean.full.Mcalc$dry_weight)*(clean.full.Mcalc$timediff))
 
 
 #write_csv(clean.full.calc, here("Data","TA","NEC.csv"))
@@ -177,7 +177,7 @@ time.data$tank <- as.character(time.data$tank)
 full.Ncalc <- left_join(Ncalc, time.data) %>%
   left_join(Nafdw %>%
               mutate(ID = as.character(ID)) %>%
-              dplyr::select(ID, dry_shell), by = "ID")
+              dplyr::select(ID, dry_weight), by = "ID")
 
 ##get rid of NAs
 clean.full.Ncalc <- full.Ncalc %>%
@@ -196,7 +196,7 @@ clean.full.Ncalc$volume <- clean.full.Ncalc$volume * 0.001
 
 #equation to calculate NEC rates 
 
-clean.full.Ncalc$umol.cm2.hr <-((clean.full.Ncalc$deltaTA/2)*(1.025)*(clean.full.Ncalc$volume))/((clean.full.Ncalc$dry_shell)*(clean.full.Ncalc$timediff))
+clean.full.Ncalc$umol.cm2.hr <-((clean.full.Ncalc$deltaTA/2)*(1.025)*(clean.full.Ncalc$volume))/((clean.full.Ncalc$dry_weight)*(clean.full.Ncalc$timediff))
 
 clean.full.calc <- clean.full.Ncalc %>%
   bind_rows(clean.full.Mcalc)
