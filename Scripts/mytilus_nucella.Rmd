@@ -16,7 +16,8 @@ knitr::opts_chunk$set(echo = TRUE,
                       message=FALSE)
 ```
 
-### Loading libraries 
+### Loading libraries
+
 ```{r,echo=FALSE, message=FALSE}
 library(dplyr)
 library(broom)
@@ -37,6 +38,7 @@ options(knitr.table.format = "html")
 ```
 
 ### Load data
+
 ```{r,echo=FALSE, message=FALSE}
 calc <- read_csv(here("Data", "TA", "NEC.csv")) # calcification 
 tankpH <- read_csv(here("Data", "pH_temp", "ph_temp_final_cut.csv.")) # ph and temp data
@@ -48,19 +50,42 @@ nucella_initial <- read_csv(here("Data", "growth", "nucella_initial.csv")) # ini
 nucella_final <- read_csv(here("Data", "afdw", "nucella_afdw.csv")) # final nucella measurements
 mortality <- read_csv(here("Data","mytilus_mortality.csv")) # mussel mortality
 musselrespo_trimmed <- read_csv(here("Data", "PR_2024", "PR_final_normalized_dry_test.csv")) 
+quadrat <- read_csv(here("Data", "field", "quadrat.csv"))
 ```
 
 ## Add tank data
+
 ```{r}
 tankpHavg <- aggregate(cbind(pH,TempInSitu) ~ tank, data = tankpH, FUN = mean) # calculate avg pHs per tank
+
+tankpH %>%
+  ggplot(aes(x=expected_pH, y= pH, group = expected_pH, color = expected_pH))+
+  geom_boxplot(width=0.1, outlier.alpha = 0.1)+
+  scale_color_gradient(low = "palegreen2", high = "#0072B2")+
+  theme_bw()+
+  theme(strip.background = element_rect(fill = "white"),
+        text = element_text(size = 16)) +
+  theme(legend.position = "none") +
+  labs(x = "Expected pH", y = "Average tank pH", color = "")
 
 respo <-
   respo %>%
   left_join(tankpHavg, by = "tank") %>%
   mutate(temp_treatment = as.factor(temp_treatment))
+
+tankpH %>%
+  ggplot(aes(x=as.factor(expected_temp), y= TempInSitu, group = expected_temp, color = as.factor(expected_temp)))+
+  geom_boxplot(width = 0.5, outlier.alpha = 0.1)+
+  scale_color_manual(values = c("#0072B2", "#D55E00")) +
+  theme_bw()+
+  theme(strip.background = element_rect(fill = "white"),
+        text = element_text(size = 16)) +
+  theme(legend.position = "none") +
+  labs(x = "Expected temperature", y = "Average tank temperature", color = "")
 ```
 
 # field
+
 ```{r}
 states<-map_data("state") #all state coordinates
 ca_data <- states %>%
@@ -74,9 +99,58 @@ ggplot()+
   theme_void()
 ```
 
+## quadrat and initial data
+```{r}
+# mussel size distribution
+quadrat %>%
+  filter(species == "mussel") %>%
+  ggplot(aes(x=shell_length)) + 
+  geom_histogram(position="dodge",bins=7,color="white", fill="steelblue4")+
+  theme_bw() + theme(axis.text=element_text(size=15),axis.title=element_text(size=18), title = element_text(size=15))+
+  labs(x="Shell length (mm)", y="Observations")
+
+summary(mussel_initial) # min and max of collected mussels
+
+# whelk size distribution
+quadrat %>%
+  filter(species == "whelk") %>%
+  ggplot(aes(x=shell_length)) + 
+  geom_histogram(position="dodge",bins=7,color="white", fill="lightgoldenrod2")+
+  theme_bw() + theme(axis.text=element_text(size=15),axis.title=element_text(size=18), title = element_text(size=15))+
+  labs(x="Shell length (mm)", y="Observations")
+
+summary(nucella_initial) # min and max of collected whelks
+
+# whelks in beds
+quadrat %>%
+  filter(species == "whelk") %>% # keep only whelk data
+  distinct(transect, meter, .keep_all = TRUE) %>%  # <- remove duplicates
+  ggplot(aes(x = 0, y=density)) + 
+    geom_dotplot(binaxis='y', stackdir='center', alpha = 0.1)+
+    theme_bw()+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), geom="pointrange", color="black", size = 1)+
+    labs(y = "Whelk density in mussel beds")+
+    theme(axis.title = element_text(size = 15), axis.text = element_text(size = 15), 
+          axis.text.x = element_blank(), axis.title.x = element_blank())
+
+# mussels
+quadrat %>%
+  filter(species == "mussel") %>% # keep only mussel data
+  distinct(transect, meter, .keep_all = TRUE) %>%  # <- remove duplicates
+  ggplot(aes(x = 0, y=density)) + 
+    geom_dotplot(binaxis='y', stackdir='center', alpha = 0.1)+
+    theme_bw()+
+    stat_summary(fun.data=mean_sdl, fun.args = list(mult=1), geom="pointrange", color="black", size = 1)+
+    labs(y = "Mussel density")+
+    theme(axis.title = element_text(size = 15), axis.text = element_text(size = 15), 
+          axis.text.x = element_blank(), axis.title.x = element_blank())
+```
+
+
 # Mussels
 
 ## Mussel growth - almost an interaction
+
 ```{r}
 musselrespo <- respo %>%
   filter(Species == "Mussel", !ID == "Shell") # filter just mussel data
@@ -144,6 +218,7 @@ musselweight_avg %>%
 ```
 
 ## Mussel shell growth - nothing
+
 ```{r}
 musselgrowth <- musselgrowth %>%
   mutate(length_change = (shell_length - shell_length_initial)/shell_length_initial) %>%
@@ -223,6 +298,7 @@ mshellmodelD %>%
 ```
 
 ## Mussel Condition Index - nothing
+
 ```{r}
 musselgrowth$CI <- musselgrowth$AFDW/musselgrowth$dry_shell*100
 mCImodel <- lm(CI ~ pH * temp_treatment, data = musselgrowth)
@@ -282,8 +358,10 @@ mCImodel_avg %>%
 mussel_calc <- calc %>%
   filter(Species == "Mussel") %>%
   mutate(ID = as.factor(ID)) %>%
-  left_join(musselrespo %>% 
-              select(ID,pH)) %>%
+  left_join(musselrespo %>%
+              select(tank, pH) %>%
+              distinct(),
+              by = "tank") %>%
   mutate(temp_treatment = as.factor(temp_treatment))
 
 Mcalc_lm <- lm(umol.cm2.hr ~ wet_weight, data=calc)
@@ -321,9 +399,9 @@ anova(mCalcmodel_avg) # nothing sig
 
 # average plot
 Mcalcplot <-
-mCalcmodel_avg %>%
-  ggplot(aes(x=pH, y=avg_calc, color = as.factor(temp_treatment),fill=as.factor(temp_treatment)))+
-  geom_point(alpha = 0.5)+
+mussel_calc_avg %>%
+  ggplot(aes(x=pH, y=avg_calc, color = temp_treatment, fill= temp_treatment))+
+  geom_point(alpha = 0.5, aes(shape = temp_treatment))+
   geom_hline(yintercept = 0, linetype = "dashed") +
   theme_bw() +
   theme(strip.background = element_rect(fill = "white"),
@@ -331,13 +409,15 @@ mCalcmodel_avg %>%
   scale_fill_manual(values = c("#0072B2", "#D55E00")) +
   scale_color_manual(values = c("#0072B2", "#D55E00")) +
   labs(x = expression(pH[T]),
-       color = "Temperature",
-       fill = "Temperature",
+       color = expression(paste("Temperature ",degree,"C")),
+       fill = expression(paste("Temperature ",degree,"C")),
+       shape = expression(paste("Temperature ",degree,"C")),
        y = expression(Calcification~rate~(mu*mol~CaCO[3]~g^-1~hr^-1)))
 
 ```
 
 ## Mussel wet to dry - bad
+
 ```{r}
 musselreg <- lm(AFDW ~ wet_weight, data=musselrespo) # how well does wet weight predict afdw?
 
@@ -414,20 +494,22 @@ anova(mresmodel_avg) # nothing sig
 # average plot
 Mrespoplot <-
 mresmodel_avg %>%
-  ggplot(aes(x=pH, y=avg_respo, color = as.factor(temp_treatment),fill=as.factor(temp_treatment)))+
-  geom_point(alpha = 0.5)+
+  ggplot(aes(x=pH, y=avg_respo, color = temp_treatment, fill = temp_treatment))+
+  geom_point(alpha = 0.5, aes(shape = temp_treatment))+
   theme_bw() +
   theme(strip.background = element_rect(fill = "white"),
         text = element_text(size = 14)) +
   scale_fill_manual(values = c("#0072B2", "#D55E00")) +
   scale_color_manual(values = c("#0072B2", "#D55E00")) +
   labs(x = expression(pH[T]),
-       color = "Temperature",
-       fill = "Temperature",
+       color = expression(paste("Temperature ",degree,"C")),
+       fill = expression(paste("Temperature ",degree,"C")),
+       shape = expression(paste("Temperature ",degree,"C")),
        y = expression(Respiration~rate~(mu*mol~O[2]~g^-1~hr^-1)))
 ```
 
 ### Respo trim test
+
 ```{r}
 musselrespo_trimmed <- musselrespo_trimmed %>%
   filter(Species == "Mussel") %>%
@@ -438,9 +520,8 @@ musselrespotrimtest <- bind_rows(list(a = musselrespo, b = musselrespo_trimmed),
 t.test(Respiration ~ id, data = musselrespotrimtest)
 ```
 
-
-
 ## C:R
+
 ```{r}
 mussel_avg <- mussel_calc_avg %>%
   left_join(musselrespo_average)
@@ -466,6 +547,7 @@ mussel_avg %>%
 # Nucella
 
 ## Nucella growth - almost temp
+
 ```{r}
 nucellarespo <- respo %>%
   filter(Species == "Nucella", !ID == "Shell") # filter just nucella data
@@ -531,6 +613,7 @@ ngrowth_avg %>%
 ```
 
 ## Nucella shell growth - temp effect!
+
 ```{r}
 nucellagrowth <- nucellagrowth %>%
   mutate(length_change = (shell_length - shell_length_initial)/shell_length_initial) %>%
@@ -701,9 +784,14 @@ nshellG_avg %>%
     fill = "pH",
     y =  expression(ΔShell~growth~(mm))) 
 
+# diff in temp treatments
+nucellagrowth %>%
+  group_by(temp_treatment) %>%
+  summarise(mean_value = mean(shell_growth, na.rm = TRUE))
 ```
 
 ## Nucella Condition Index - not sig
+
 ```{r}
 nucellagrowth$CI <- nucellagrowth$AFDW/nucellagrowth$dry_shell*100
 nCImodel <- lm(CI ~ pH * temp_treatment, data = nucellagrowth)
@@ -758,7 +846,7 @@ nCImodel_avg %>%
   )
 ```
 
-## Nucella calcification - seeing higher metabolism in lower temp interestingly...
+## Nucella calcification - temp effect! 
 ```{r}
 nucella_calc <- calc %>%
   filter(Species == "Nucella") %>%
@@ -835,9 +923,15 @@ ncalcmodel_avg %>%
     x = expression(paste("Temperature ",degree,"C")),
     fill = "pH",
      y = expression(Calcification~rate~(mu*mol~CaCO[3]~g^-1~hr^-1)))
+
+# diff between temp treatments
+nucella_calc %>%
+  group_by(temp_treatment) %>%
+  summarise(mean_value = mean(umol.cm2.hr, na.rm = TRUE))
 ```
 
 ## Nucella respo - temperature significant again but opposite of what i expected
+
 ```{r}
 # does weight matter? no
 nucrespoweight <- lm(Respiration ~ AFDW, data = nucellarespo) # does AFDW predict respiration rate?
@@ -926,9 +1020,14 @@ nucrespoavg %>%
     fill = "pH",
     y = expression(Respiration~rate~(mu*mol~O[2]~g^-1~hr^-1)))
 
+# diff between temps
+nucellarespo %>%
+  group_by(temp_treatment) %>%
+  summarise(mean_value = mean(Respiration, na.rm = TRUE))
 ```
 
 ## C:R
+
 ```{r}
 nucella_avg <- nucellacalc_avg %>%
   left_join(nucellarespo_avg)
@@ -950,7 +1049,9 @@ nucella_avg %>%
     fill = "Temperature",
     x = expression(Respiration~rate~(mu*mol~O[2]~g^-1~hr^-1)))
 ```
+
 # Nucella mortality
+
 ```{r}
 nucellaMortality <- nucellarespo %>%
   group_by(tank) %>%
@@ -993,6 +1094,40 @@ predation %>%
 
 ```
 
+## Biomass eaten
+```{r}
+predation <- mortality %>%
+  filter(eaten == "Y") %>% # filter out eaten mussels
+  group_by(tank) %>%
+  summarise(biomass_eaten = sum(wet_weight, na.rm = TRUE)) %>% # biomass eaten per tank
+  left_join(musselrespo %>%
+            group_by(tank) %>%
+            summarise(pH = mean(pH, na.rm = TRUE),
+                      temp_treatment = first(temp_treatment)))  # add treatment data
+
+predation_bmodel <- lm(biomass_eaten ~ pH * temp_treatment, data = predation)
+plot(predation_bmodel)
+anova(predation_bmodel) # nothing
+
+eatenplot <- 
+predation %>%
+  ggplot(aes(x = pH, y = biomass_eaten)) +
+  geom_point(alpha = 0.5, aes(color = as.factor(temp_treatment), fill = as.factor(temp_treatment)))+
+  #geom_smooth(method = "lm", se = TRUE, color = "black", fill = "gray70") +
+  theme_bw()+
+  theme(
+    strip.background = element_rect(fill = "white"),
+    text = element_text(size = 14)
+  ) +
+  scale_fill_manual(values = c("#0072B2", "#D55E00")) +
+  scale_color_manual(values = c("#0072B2", "#D55E00")) +
+    labs(
+    x = expression(pH[T]),
+    color = expression(paste("Temperature ",degree,"C")),
+    fill = expression(paste("Temperature ",degree,"C")),
+    y = "Biomass of mussels eaten (g)")
+```
+
 ## Predation - biomass eaten standardized to control
 ```{r}
 mortality_ctrl <- mortality %>%
@@ -1012,12 +1147,12 @@ temp_treatment = first(temp_treatment)),by = "tank") %>%
   replace_na(list(biomass_lost = 0)) %>%  # replace NA with 0
   mutate(eaten_lost = (biomass_eaten+1)/(biomass_lost+1)) # add 1 to get rid of 0 values
 
-predation_bmodel <- lm(biomass_eaten ~ pH * temp_treatment, data = predation)
-plot(predation_bmodel)
-anova(predation_bmodel) # nothing
+predation_b_n_model <- lm(eaten_lost ~ pH * temp_treatment, data = predation)
+plot(predation_b_n_model)
+anova(predation_b_n_model) # nothing
 
 predation %>%
-  ggplot(aes(x = pH, y = biomass_eaten)) +
+  ggplot(aes(x = pH, y = eaten_lost)) +
   geom_point(alpha = 0.5, aes(color = as.factor(temp_treatment), fill = as.factor(temp_treatment)))+
   geom_smooth(method = "lm", se = TRUE, color = "black", fill = "gray70") +
   theme_bw()+
@@ -1027,12 +1162,12 @@ predation %>%
   ) +
   scale_fill_manual(values = c("#0072B2", "#D55E00")) +
   scale_color_manual(values = c("#0072B2", "#D55E00")) +
-    labs(
-    x = expression(pH[T]),
+    labs(x = expression(pH[T]),
     color = expression(paste("Temperature ",degree,"C")),
     fill = expression(paste("Temperature ",degree,"C")),
     y = "Biomass of mussels eaten (g)")
 ```
+
 
 ## Mortality
 ```{r}
@@ -1096,33 +1231,47 @@ predation %>%
 ```{r}
 predation_d <- mortality %>%
   filter(eaten == "Y") %>%
+  mutate(drilled = as.factor(drilled)) %>%
   group_by(tank) %>%
-  mutate(drill = nrow(drilled == "Y")) 
-#  dplyr::select("tank","drilled","eaten","wet_weight") %>%
+  dplyr::select("tank","drilled","wet_weight") %>%
   left_join(musselrespo %>%
               dplyr::select(c("tank", "pH", "temp_treatment")), by = c("tank")) # add treatment data
 
-drilledmodel <- glm(drilled ~ gre + gpa + rank, data = predation_b, family = "binomial")
+drilledmodel <- glm(drilled ~ pH * temp_treatment, family = "binomial", data = predation_d)
+summary(drilledmodel)
+anova(drilledmodel, test = "Chisq")
 
-mortality_c %>%
-  ggplot(aes(x = pH, y = ctrlmortality, color = as.factor(temp), fill = as.factor(temp))) +
-  geom_point(alpha = 0.5)+
-  geom_smooth(method = "lm", se = TRUE) +
+predation_d$drill_prob <- predict(drilledmodel, type = "response")
+#drillplot <- 
+  ggplot(predation_d, aes(x = pH, y = drill_prob, color = temp_treatment, fill = temp_treatment)) +
+  geom_point(alpha = 0.4) +
+  geom_smooth(method = "loess", se = FALSE) +
+  scale_color_manual(values = c("#0072B2", "#D55E00")) +
+  labs(x = expression(pH[T]),
+       y = "Predicted Probability of Being Drilled", 
+       color = expression(paste("Temperature ",degree,"C")), 
+       fill  = expression(paste("Temperature ",degree,"C"))) +
+  theme_bw()
+  
+#get rid of pH
+predation_d %>% 
+  ggplot(aes(x = temp_treatment, y = drill_prob)) +
+  geom_boxplot(alpha=0.5, outlier.alpha=0) + 
+  geom_jitter(aes(fill = as.numeric(pH)),width=0.25, pch=21, size=2) +
+  scale_fill_gradient(low = "palegreen2", high = "#0072B2")+
   theme_bw()+
   theme(
     strip.background = element_rect(fill = "white"),
     text = element_text(size = 14)
   ) +
-  scale_fill_manual(values = c("salmon", "salmon4")) +
-  scale_color_manual(values = c("salmon", "salmon4")) +
-    labs(
-    x = expression(pH[T]),
-    color = "Temperature",
-    fill = "Temperature",
-    y = "Mussels eaten")
+    labs(x = expression(pH[T]),
+       y = "Predicted Probability of Being Drilled", 
+       color = expression(paste("Temperature ",degree,"C")), 
+       fill  = expression(paste("Temperature ",degree,"C")))
 ```
 
 ### patchworked graphs
+
 ```{r}
 Mrespoplot + Mcalcplot + plot_layout(guides = "collect", axes = "collect_x")
 
@@ -1131,4 +1280,9 @@ ggsave("mytilus.png", path=here("Output"), width = 16, height = 8)
 Nrespoplot + Ncalcplot + shellgrowthplot + plot_layout(guides = "collect", axes = "collect_x")
 
 ggsave("nucella.png", path=here("Output"), width = 16, height = 8)
+
+eatenplot + drillplot + plot_layout(guides = "collect", axes = "collect_x")
+
+ggsave("nucella predation.png", path=here("Output"), width = 16, height = 8)
+
 ```
