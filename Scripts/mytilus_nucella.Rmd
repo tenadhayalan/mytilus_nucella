@@ -1237,9 +1237,14 @@ predation_d <- mortality %>%
   left_join(musselrespo %>%
               dplyr::select(c("tank", "pH", "temp_treatment")), by = c("tank")) # add treatment data
 
-drilledmodel <- glm(drilled ~ pH * temp_treatment, family = "binomial", data = predation_d)
-summary(drilledmodel)
+drilledmodelfull <- glm(drilled ~ pH * temp_treatment, family = "binomial", data = predation_d)
+summary(drilledmodelfull)
 anova(drilledmodel, test = "Chisq")
+
+drilledmodeltemp <- glm(drilled ~ pH * temp_treatment, family = "binomial", data = predation_d)
+summary(drilledmodeltemp)
+anova(drilledmodeltemp, test = "Chisq")
+
 
 predation_d$drill_prob <- predict(drilledmodel, type = "response")
 #drillplot <- 
