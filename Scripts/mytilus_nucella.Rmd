@@ -1296,7 +1296,7 @@ anova(drilledmodeltemp, test = "Chisq")
 
 
 predation_d$drill_prob <- predict(drilledmodel, type = "response")
-#drillplot <- 
+drillplot <- 
   ggplot(predation_d, aes(x = pH, y = drill_prob, color = temp_treatment, fill = temp_treatment)) +
   geom_point(alpha = 0.4) +
   geom_smooth(method = "loess", se = FALSE) +
