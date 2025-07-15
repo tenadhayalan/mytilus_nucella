@@ -34,6 +34,7 @@ require(kableExtra)
 library(tidyverse)
 library(car)
 library(patchwork)
+library(seacarb)
 options(knitr.table.format = "html")
 ```
 
@@ -51,7 +52,24 @@ nucella_final <- read_csv(here("Data", "afdw", "nucella_afdw.csv")) # final nuce
 mortality <- read_csv(here("Data","mytilus_mortality.csv")) # mussel mortality
 musselrespo_trimmed <- read_csv(here("Data", "PR_2024", "PR_final_normalized_dry_test.csv")) 
 quadrat <- read_csv(here("Data", "field", "quadrat.csv"))
+temp <- read.csv(here("Data","field","san_pedro_temp_buoy.csv")) #https://data.caloos.org/#metadata/103471/station/data
+TA <- read.csv(here("Data","TA","background_TA","background_TA.csv"))
 ```
+
+## carb data
+```{r}
+carb <- carb(8, var1 = TA$pH, var2 = TA$TA, S = TA$Salinity_lab, T = TA$TempInSitu, pHscale = "T")
+
+carb <- carb %>%
+  left_join(TA)
+
+carb %>%
+  ggplot(aes(x = tank, y = OmegaCalcite, group = tank)) +
+  geom_boxplot()
+
+write.csv(carb, here("Data/pH_temp/carb.csv"))
+```
+
 
 ## Add tank data
 
@@ -97,6 +115,37 @@ ggplot()+
   geom_point(aes(x = -118.319, y = 33.715), color= "blue", size = 5)+
   coord_map()+
   theme_void()
+```
+## field temp
+```{r}
+# calculate weekly averages
+temp <- temp %>%
+  mutate(date = as.Date(date, format="%m/%d/%Y")) # adjust date format
+
+temp <- temp %>%
+  group_by(week = floor_date(date, "week")) %>%  # groups by week
+  mutate(weekly_avg = mean(sea_water_temperature, na.rm = TRUE))  # computes weekly mean
+
+# calculate loess model
+collection_dates <- as.Date(c("2024-07-07"))
+loess_fit <- loess(sea_water_temperature ~ as.numeric(date), data = temp)
+collections <- data.frame(date = collection_dates,
+  loess_fitted = predict(loess_fit, newdata = as.numeric(collection_dates)))
+
+temp %>%
+  ggplot(aes(x = as.factor(date), y = sea_water_temperature)) +
+  geom_smooth(aes(x = date, y = weekly_avg),method = "loess", color = "salmon4", size = 1)+
+  geom_point(aes(x = date, y = sea_water_temperature), color = "salmon4", alpha = 0.1) +
+  #geom_point(data = collections, aes(x= date, y = loess_fitted), color = "salmon", size = 4) +  # LOESS y values
+  theme_bw()+
+  theme(
+    strip.background = element_rect(fill = "white"),
+    text = element_text(size = 14),
+    legend.position = "none") +
+    labs(x = expression(Date),
+    y = expression(Temperature)
+  ) 
+
 ```
 
 ## quadrat and initial data
@@ -1241,7 +1290,7 @@ drilledmodelfull <- glm(drilled ~ pH * temp_treatment, family = "binomial", data
 summary(drilledmodelfull)
 anova(drilledmodel, test = "Chisq")
 
-drilledmodeltemp <- glm(drilled ~ pH * temp_treatment, family = "binomial", data = predation_d)
+drilledmodeltemp <- glm(drilled ~ temp_treatment, family = "binomial", data = predation_d)
 summary(drilledmodeltemp)
 anova(drilledmodeltemp, test = "Chisq")
 
