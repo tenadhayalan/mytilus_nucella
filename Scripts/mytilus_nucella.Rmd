@@ -54,20 +54,47 @@ musselrespo_trimmed <- read_csv(here("Data", "PR_2024", "PR_final_normalized_dry
 quadrat <- read_csv(here("Data", "field", "quadrat.csv"))
 temp <- read.csv(here("Data","field","san_pedro_temp_buoy.csv")) #https://data.caloos.org/#metadata/103471/station/data
 TA <- read.csv(here("Data","TA","background_TA","background_TA.csv"))
+carb <- read.csv(here("Data", "pH_temp", "carb.csv"))
 ```
 
 ## carb data
 ```{r}
-carb <- carb(8, var1 = TA$pH, var2 = TA$TA, S = TA$Salinity_lab, T = TA$TempInSitu, pHscale = "T")
+# carb <- carb(8, var1 = TA$pH, var2 = TA$TA, S = TA$Salinity_lab, T = TA$TempInSitu, pHscale = "T")
 
-carb <- carb %>%
-  left_join(TA)
+# carb <- carb %>%
+ # left_join(TA)
 
-carb %>%
-  ggplot(aes(x = tank, y = OmegaCalcite, group = tank)) +
-  geom_boxplot()
+# write.csv(carb, here("Data/pH_temp/carb.csv"))
 
-write.csv(carb, here("Data/pH_temp/carb.csv"))
+# calculate means and sds for each column
+carb_summary <- carb %>%
+  group_by(tank) %>%
+  summarise(
+    across(where(is.numeric),
+           list(mean = ~mean(.x, na.rm = TRUE),
+                sd = ~sd(.x, na.rm = TRUE)),
+           .names = "{.col}_{.fn}") 
+  )
+
+# reformat so mean and sd are in the same column
+carb_summary <- carb_summary %>%
+  rowwise() %>%
+  mutate(
+    across(
+      ends_with("_mean"),
+      ~ {
+        base <- sub("_mean$", "", cur_column())
+        mean_val <- .x
+        sd_val <- get(paste0(base, "_sd"))
+        sprintf("%.2f ± %.2f", mean_val, sd_val)
+      },
+      .names = "{.col}_formatted"
+    )
+  ) %>%
+  ungroup() %>%
+  select(tank, ends_with("_formatted"))
+
+write.csv(carb_summary, here("Data/pH_temp/carb_summary.csv"))
 ```
 
 
@@ -116,6 +143,7 @@ ggplot()+
   coord_map()+
   theme_void()
 ```
+
 ## field temp
 ```{r}
 # calculate weekly averages
@@ -424,6 +452,7 @@ anova(Mcalcmodel) # pH sig
 # normal plot
 Mcalcmodel %>%
   ggplot(aes(x=pH, y=umol.cm2.hr, color = as.factor(temp_treatment),fill=as.factor(temp_treatment)))+
+ # geom_smooth(method = "lm") +
   geom_point(alpha = 0.5)+
   theme_bw() +
   theme(strip.background = element_rect(fill = "white"),
@@ -451,6 +480,7 @@ Mcalcplot <-
 mussel_calc_avg %>%
   ggplot(aes(x=pH, y=avg_calc, color = temp_treatment, fill= temp_treatment))+
   geom_point(alpha = 0.5, aes(shape = temp_treatment))+
+  # geom_smooth(method = "lm") +
   geom_hline(yintercept = 0, linetype = "dashed") +
   theme_bw() +
   theme(strip.background = element_rect(fill = "white"),
