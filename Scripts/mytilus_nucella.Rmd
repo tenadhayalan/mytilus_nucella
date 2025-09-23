@@ -26,6 +26,7 @@ library(lubridate)
 library(tidyverse)
 library(nlstools)
 library(here)
+library(emmeans)
 library(stringr)
 library(lmerTest)
 library(lme4)
@@ -110,7 +111,7 @@ tankpHavg <- aggregate(cbind(pH,TempInSitu) ~ tank, data = tankpH, FUN = mean) #
 tankpH %>%
   ggplot(aes(x=expected_pH, y= pH, group = expected_pH, fill = expected_pH))+
   geom_boxplot(width=0.1, outlier.alpha = 0.1)+
-  scale_fill_gradient(low = "#ffc43d", high = "#06d6a0")+
+  scale_fill_gradient(low = "#ed872d", high = "#512889")+
   theme_bw()+
   theme(strip.background = element_rect(fill = "white"),
         text = element_text(size = 16)) +
@@ -678,14 +679,17 @@ musselreg %>%
 
 ## Mussel respo - nothing
 ```{r}
-# check if weight is driving respo
-musrespoweight <- lm(Respiration ~ AFDW, data=musselrespo) # does AFDW predict respiration rate?
-summary(musrespoweight)
-musselrespo <- musselrespo %>%
-  mutate(model = predict(musrespoweight))
-anova(musrespoweight) # weight significant
+# determine metabolic scaling of respiration rate 
+musrespoweight <- lm(log(Respiration) ~ log(AFDW) + pH + temp_treatment, data=musselrespo)
+musrespoweight_all <- lm(log(Respiration) ~ log(AFDW) * pH * temp_treatment, data=musselrespo)
 
-summary(musselrespo) # get avgs
+# test if interactions
+anova(musrespoweight,musrespoweight_all) # no interactions between pH x AFDW or temp x AFDW
+anova(musrespoweight_all) # no interactions between pH x AFDW or temp x AFDW
+
+anova(musrespoweight) # temp and AFDW significant
+summary(musrespoweight) # slope is only ~0.6, should be closer to 0.75 per kleiber's law
+plot(musrespoweight)
 
 musselrespo %>%
   ggplot(aes(x=AFDW, y=Respiration))+
@@ -1030,7 +1034,7 @@ nshellG_avg %>%
   ggplot(aes(x =temp_treatment , y = avg_shellG)) +
   geom_boxplot(alpha=0.5, outlier.alpha=0) + 
   geom_jitter(aes(fill = as.numeric(pH)),width=0.25, pch=21, size=2) +
-  scale_fill_gradient(low = "#ffc43d", high = "#06d6a0")+
+  scale_fill_gradient(low = "#ed872d", high = "#512889")+
   theme_bw()+
   theme(
     strip.background = element_rect(fill = "white"),
@@ -1185,7 +1189,7 @@ ncalcmodel_avg %>%
   geom_hline(yintercept = 0, linetype = "dashed") +
   geom_boxplot(alpha=0.5, outlier.alpha=0) + 
   geom_jitter(aes(fill = as.numeric(pH)),width=0.25, pch=21, size=2) +
-  scale_fill_gradient(low = "#ffc43d", high = "#06d6a0")+
+  scale_fill_gradient(low = "#ed872d", high = "#512889")+
   theme_bw()+
   theme(
     strip.background = element_rect(fill = "white"),
@@ -1240,8 +1244,11 @@ Nshellcalcmodel_avg %>%
 
 ```{r}
 # does weight matter? no
-nucrespoweight <- lm(Respiration ~ AFDW, data = nucellarespo) # does AFDW predict respiration rate?
-#plot(nucrespoweight)
+nucrespoweight <- lm(log(Respiration) ~ log(AFDW) + pH + temp_treatment, data = nucellarespo) # does AFDW predict respiration rate?
+nucrespoweight_all <- lm(log(Respiration) ~ log(AFDW) * pH * temp_treatment, data = nucellarespo) 
+anova(nucrespoweight,nucrespoweight_all)
+summary(nucrespoweight)
+
 anova(nucrespoweight) # weight not significant
 
 summary(nucellarespo)
@@ -1317,7 +1324,7 @@ nucrespoavg %>%
   ggplot(aes(x = temp_treatment, y = avg_respo)) +
   geom_boxplot(alpha=0.5, outlier.alpha=0) + 
   geom_jitter(aes(fill = as.numeric(pH)),width=0.25, pch=21, size=2) +
-  scale_fill_gradient(low = "#ffc43d", high = "#06d6a0")+
+  scale_fill_gradient(low = "#ed872d", high = "#512889")+
   theme_bw()+
   theme(
     strip.background = element_rect(fill = "white"),
