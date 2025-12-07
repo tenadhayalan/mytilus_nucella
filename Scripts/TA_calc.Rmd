@@ -27,7 +27,8 @@ library(stringr)
 ## Load datasets 
 
 ```{r}
-respo <- read_csv(here("Data","PR_2024","Metadata_full.csv"))
+respo <- read_csv(here("Data","PR_2024","Metadata_shells.csv"))
+calc <- read_csv(here("Data", "TA", "Calcification_shells.csv"))
 Mcalc <- read_csv(here("Data", "TA", "Calcification_mussel_clean.csv"))
 Ncalc <- read_csv(here("Data", "TA", "Calcification_nucella_clean.csv"))
 Mafdw <- read_csv(here("Data", "afdw", "mussel_afdw.csv"))
@@ -228,4 +229,70 @@ ggplot(data=clean.full.Ncalc, aes(x=pH_treatment, y=umol.cm2.hr, group = interac
   labs(x = "pH",
        color = "Temperature",
        y = "Rate (umol CO3 g-1 hr-1)")
+```
+
+# Shells
+```{r}
+#get initial data
+rows.initial <- which(calc$sample_type == "Initial") #tells you all the rows that you have with initial
+initial <- calc[rows.initial,]
+
+#take means of initial data
+initial_mean <- initial %>%
+  group_by(tank) %>%
+  summarise(TA_initial = mean(TA))
+
+#bring initials into data frame by tank
+calc <- calc %>%
+  left_join(initial_mean, by= c("tank"))
+
+
+#get blank data
+rows.blank <- which(calc$sample_type == "Blank") #tells you all the rows that you have with blank
+blanks <- calc[rows.blank,]
+
+#figure out delta TA, initial-final
+
+blanks$delta.TA.blank <- blanks$TA_initial - blanks$TA
+
+#add blank column
+mean.blanks <- blanks %>% 
+  group_by(tank) %>%
+  summarise(mean.blanks=mean(delta.TA.blank)) 
+
+calc <- left_join(calc, mean.blanks) #bring in mean blanks to calc.data
+
+#bring in time, mass, volume
+
+time.data <- respo %>%
+  dplyr::select(c("ID", "tank", "pH_treatment", "temp_treatment", "volume", "wet_weight", "TA.start", "TA.stop", "Species", "block")) 
+
+calc$tank <- as.character(calc$tank) # convert tank to character to join
+time.data$tank <- as.character(time.data$tank)
+
+full.calc <- calc %>%
+  rename("Species" = "sample_type") %>%
+  left_join(time.data, by = c("tank", "Species"))
+
+##get rid of NAs
+clean.full.calc <- full.calc %>%
+  filter(!is.na(TA.start))
+
+#adjust the time information and format
+clean.full.calc$TA.start <- strptime(as.character(clean.full.calc$TA.start), "%H:%M:%S")
+clean.full.calc$TA.stop <- strptime(as.character(clean.full.calc$TA.stop), "%H:%M:%S")
+#calculate the NEC rate
+
+clean.full.calc$deltaTA<- (clean.full.calc$TA_initial - clean.full.calc$TA)
+clean.full.calc$timediff <- as.numeric((clean.full.calc$TA.stop - clean.full.calc$TA.start)) 
+
+#convert volume from mL to L
+clean.full.calc$volume <- clean.full.calc$volume * 0.001
+
+#equation to calculate NEC rates 
+
+clean.full.calc$umol.cm2.hr <-((clean.full.calc$deltaTA/2)*(1.025)*(clean.full.calc$volume))/((clean.full.calc$timediff))
+
+
+#write_csv(clean.full.calc, here("Data","TA","shell_NEC.csv"))
 ```
